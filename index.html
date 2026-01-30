@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Test - Ms Hải (Timed)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --primary: #8854C0;
+            --secondary: #00C9A7;
+            --success: #00D26A;
+            --error: #FF4757;
+            --warning: #FFD32A;
+            --bg: #f0f7ff;
+        }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background-color: var(--bg);
+            background-image: radial-gradient(#8854c0 0.5px, transparent 0.5px), radial-gradient(#8854c0 0.5px, #f0f7ff 0.5px);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        /* Start Screen */
+        #start-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--primary);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+        }
+
+        .start-btn {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 20px 50px;
+            font-size: 1.5rem;
+            font-weight: 800;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 0 #008f76;
+            margin-top: 30px;
+            transition: 0.2s;
+        }
+
+        .start-btn:active { transform: translateY(4px); box-shadow: 0 4px 0 #008f76; }
+
+        /* Timer Header */
+        #timer-header {
+            position: sticky;
+            top: 0;
+            background: white;
+            padding: 10px;
+            display: none;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            z-index: 999;
+            border-bottom: 4px solid var(--secondary);
+        }
+
+        #time-display {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--error);
+        }
+
+        /* Content */
+        .main-quiz { display: none; padding: 20px; }
+
+        header {
+            text-align: center;
+            background: white;
+            padding: 10px;
+            border-radius: 20px;
+            box-shadow: 0 4px 0 #ddd;
+            max-width: 600px;
+            margin: 20px auto;
+        }
+
+        .container { max-width: 800px; margin: 0 auto; padding-bottom: 100px; }
+
+        .card {
+            background: white;
+            border-radius: 25px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 0 #e0e0e0;
+            position: relative;
+        }
+
+        .question-text { font-size: 1.1rem; font-weight: 700; display: block; margin-bottom: 20px; }
+
+        /* Multi Choice Buttons */
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .btn-opt {
+            background: white; border: 2px solid #e0e0e0; border-radius: 20px;
+            padding: 15px; font-family: inherit; font-weight: 600; cursor: pointer;
+            box-shadow: 0 6px 0 #e0e0e0; transition: 0.2s; text-align: left;
+        }
+        .btn-opt:hover:not(:disabled) { transform: scale(1.02); background: #f8f9fa; }
+        .btn-opt.selected { border-color: var(--primary); background: #f3ebff; }
+        .btn-opt.correct { background: var(--success) !important; color: white; border-color: #00a352; box-shadow: 0 6px 0 #008141; }
+        .btn-opt.wrong { background: var(--error) !important; color: white; border-color: #d63031; box-shadow: 0 6px 0 #af2323; animation: shake 0.4s; }
+
+        input[type="text"] {
+            width: 100%; padding: 15px; border: 2px solid #e0e0e0; border-radius: 15px;
+            font-size: 1rem; font-family: inherit; outline: none; box-sizing: border-box;
+        }
+
+        .explanation {
+            display: none; margin-top: 20px; padding: 20px; background: #fdf2ff;
+            border-left: 5px solid var(--primary); border-radius: 10px; font-size: 0.95rem;
+        }
+
+        .check-btn {
+            margin-top: 15px; background: var(--secondary); color: white; border: none;
+            padding: 10px 25px; border-radius: 15px; font-weight: 700; cursor: pointer;
+            box-shadow: 0 4px 0 #008f76;
+        }
+
+        #anti-cheat-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); z-index: 9999; color: white; text-align: center; padding-top: 20%;
+        }
+
+        .footer {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: white; padding: 15px; display: flex; justify-content: center;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.1); z-index: 100;
+        }
+
+        .submit-all {
+            background: var(--primary); color: white; border: none; padding: 15px 50px;
+            font-size: 1.2rem; font-weight: 800; border-radius: 50px; cursor: pointer; box-shadow: 0 6px 0 #5d3985;
+        }
+
+        .glossary-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .glossary-table th { background: var(--secondary); color: white; padding: 10px; }
+        .glossary-table td { border: 1px solid #eee; padding: 10px; text-align: center; }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+    </style>
+</head>
+<body>
+
+<div id="start-screen">
+    <h1>CHÀO MỪNG CON ĐẾN VỚI LỚP CÔ HẢI!</h1>
+    <p>Bài kiểm tra: <b>Từ vựng & Ngữ pháp Tổng hợp</b></p>
+    <p>Thời gian: <b>30 phút</b></p>
+    <button class="start-btn" onclick="startQuiz()">BẮT ĐẦU LÀM BÀI</button>
+</div>
+
+<div id="timer-header">
+    <div>Học sinh: <b>Đang làm bài...</b></div>
+    <div id="time-display">30:00</div>
+</div>
+
+<div id="anti-cheat-overlay">
+    <h1>⚠️ CẢNH BÁO GIAN LẬN!</h1>
+    <p>Con đã thoát khỏi trang làm bài. Quay lại ngay!</p>
+    <button onclick="document.getElementById('anti-cheat-overlay').style.display='none'" class="check-btn">QUAY LẠI</button>
+</div>
+
+<div class="main-quiz" id="main-content">
+    <header>
+        <h2>Giáo viên tạo: Ms Hải</h2>
+        <h1>ENGLISH CHALLENGE</h1>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <span class="question-text">I. Give the correct form of the word in brackets:</span>
+            <div id="q1">
+                <p>1. Many people in developing countries still live in extreme _______________. (POOR)</p>
+                <input type="text" id="ans-1" class="timed-input">
+                <button class="check-btn" onclick="checkAnswer(1, 'poverty')">LƯU & CHECK</button>
+                <div class="explanation" id="exp-1">
+                    <strong>Giải thích từ Ms Hải:</strong><br>
+                    - Bước 1: Dịch câu: Nhiều người ở các nước đang phát triển sống trong cảnh nghèo khổ cùng cực.<br>
+                    - Bước 2: POOR (adj): nghèo.<br>
+                    - Bước 3: Sau "extreme" (adj) ta cần một danh từ (Noun).<br>
+                    - Bước 4: <b>Poverty</b> (n) là sự nghèo khổ.
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <span class="question-text">II. Multiple Choice:</span>
+            <div id="q5">
+                <p>5. Could you tell me who is in _______________ of the department, please?</p>
+                <div class="options-grid">
+                    <button class="btn-opt" onclick="select(5, 'A')">A. responsibility</button>
+                    <button class="btn-opt" onclick="select(5, 'B')">B. charge</button>
+                    <button class="btn-opt" onclick="select(5, 'C')">C. rule</button>
+                    <button class="btn-opt" onclick="select(5, 'D')">D. organization</button>
+                </div>
+                <button class="check-btn" onclick="checkMulti(5, 'B')">LƯU & CHECK</button>
+                <div class="explanation" id="exp-5">
+                    <strong>Giải thích từ Ms Hải:</strong><br>
+                    - Bước 1: Dịch câu: Ai phụ trách bộ phận này?<br>
+                    - Bước 2: A. Trách nhiệm; B. Phụ trách; C. Luật; D. Tổ chức.<br>
+                    - Bước 3: Cấu trúc <b>"in charge of"</b> (phụ trách).<br>
+                    - Bước 4: Responsibility đi với giới từ "for".
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <span class="question-text">III. Reading (The Excuses)</span>
+            <p style="background: #f9f9f9; padding: 15px; border-radius: 10px;">
+                ...Deidre stood up and said that she (1) <b>would</b> love to give a donation, but her house was (2) <b>being</b> painted...
+            </p>
+            <table class="glossary-table">
+                <tr><th>Word</th><th>Type</th><th>Meaning</th></tr>
+                <tr><td>Donate</td><td>v</td><td>Quyên góp</td></tr>
+            </table>
+            <p>(1) <input type="text" id="ans-r1" style="width: 100px"></p>
+            <button class="check-btn" onclick="checkReading()">CHECK PHẦN ĐỌC</button>
+            <div class="explanation" id="exp-reading"><b>Dẫn chứng:</b> Trong câu gián tiếp, lùi thì từ "will" thành "would".</div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <button class="submit-all" onclick="submitFinal()">NỘP BÀI TỔNG</button>
+    </div>
+</div>
+
+<audio id="snd-correct" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
+<audio id="snd-wrong" src="https://www.soundjay.com/misc/sounds/fail-trombone-01.mp3"></audio>
+
+<script>
+    let timeLeft = 30 * 60; // 30 minutes in seconds
+    let timerId;
+    let quizSubmitted = false;
+    let multiAnswers = {};
+
+    function startQuiz() {
+        document.getElementById('start-screen').style.display = 'none';
+        document.getElementById('timer-header').style.display = 'flex';
+        document.getElementById('main-content').style.display = 'block';
+        startTimer();
+    }
+
+    function startTimer() {
+        timerId = setInterval(() => {
+            timeLeft--;
+            updateTimerDisplay();
+            if (timeLeft <= 0) {
+                clearInterval(timerId);
+                submitFinal(true); // Auto-submit
+            }
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        document.getElementById('time-display').innerText = 
+            `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        if (timeLeft < 60) document.getElementById('time-display').style.color = 'red';
+    }
+
+    // Anti-Cheat
+    window.addEventListener('blur', () => {
+        if(!quizSubmitted) document.getElementById('anti-cheat-overlay').style.display = 'block';
+    });
+
+    function select(qId, val) {
+        if(quizSubmitted) return;
+        multiAnswers[qId] = val;
+        const btns = document.querySelectorAll(`#q${qId} .btn-opt`);
+        btns.forEach(b => {
+            b.classList.remove('selected');
+            if(b.innerText.startsWith(val)) b.classList.add('selected');
+        });
+    }
+
+    function checkAnswer(id, correct) {
+        const input = document.getElementById('ans-' + id);
+        const exp = document.getElementById('exp-' + id);
+        if(input.value.toLowerCase().trim() === correct) {
+            input.style.borderColor = "var(--success)";
+            playCorrect();
+        } else {
+            input.style.borderColor = "var(--error)";
+            playWrong();
+        }
+        exp.style.display = "block";
+    }
+
+    function checkMulti(id, correct) {
+        const exp = document.getElementById('exp-' + id);
+        const btns = document.querySelectorAll(`#q${id} .btn-opt`);
+        btns.forEach(b => {
+            b.disabled = true;
+            if(b.innerText.startsWith(correct)) b.classList.add('correct');
+            else if(b.classList.contains('selected')) b.classList.add('wrong');
+        });
+        exp.style.display = "block";
+        if(multiAnswers[id] === correct) playCorrect(); else playWrong();
+    }
+
+    function playCorrect() {
+        document.getElementById('snd-correct').play();
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+    }
+
+    function playWrong() {
+        document.getElementById('snd-wrong').play();
+    }
+
+    function submitFinal(isAuto = false) {
+        if(quizSubmitted) return;
+        quizSubmitted = true;
+        clearInterval(timerId);
+        
+        // Khóa toàn bộ input
+        document.querySelectorAll('input, button:not(.check-btn)').forEach(el => el.disabled = true);
+        
+        const msg = isAuto ? "HẾT GIỜ RỒI! Hệ thống đã tự động thu bài." : "Chúc mừng con đã hoàn thành bài thi!";
+        alert(msg);
+        
+        // Tự động hiện tất cả đáp án đúng và giải thích
+        document.querySelectorAll('.explanation').forEach(el => el.style.display = 'block');
+        window.scrollTo(0,0);
+    }
+</script>
+
+</body>
+</html>
