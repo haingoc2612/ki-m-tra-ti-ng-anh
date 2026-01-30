@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>English Test - Ms Hải (Timed)</title>
+    <title>English Test - Ms Hải</title>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root {
             --primary: #8854C0;
@@ -19,329 +20,374 @@
         body {
             font-family: 'Quicksand', sans-serif;
             background-color: var(--bg);
-            background-image: radial-gradient(#8854c0 0.5px, transparent 0.5px), radial-gradient(#8854c0 0.5px, #f0f7ff 0.5px);
+            background-image: radial-gradient(var(--primary) 0.5px, transparent 0.5px), radial-gradient(var(--secondary) 0.5px, var(--bg) 0.5px);
             background-size: 20px 20px;
-            background-position: 0 0, 10px 10px;
             margin: 0;
-            padding: 0;
-            user-select: none;
+            overflow-x: hidden;
+            color: #2d3436;
         }
 
-        /* Start Screen */
+        /* Login & Start Screen */
         #start-screen {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            inset: 0;
             background: var(--primary);
-            z-index: 10000;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
+            z-index: 10000;
             color: white;
             text-align: center;
+        }
+
+        .login-card {
+            background: white;
+            padding: 40px;
+            border-radius: 30px;
+            color: #333;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .login-card h1 { color: var(--primary); margin-bottom: 20px; }
+        .login-card input {
+            width: 100%;
+            padding: 15px;
+            margin: 15px 0;
+            border: 2px solid #eee;
+            border-radius: 15px;
+            font-family: inherit;
+            box-sizing: border-box;
         }
 
         .start-btn {
             background: var(--secondary);
             color: white;
             border: none;
-            padding: 20px 50px;
-            font-size: 1.5rem;
-            font-weight: 800;
+            padding: 15px 40px;
             border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 700;
             cursor: pointer;
-            box-shadow: 0 8px 0 #008f76;
-            margin-top: 30px;
+            box-shadow: 0 6px 0 #008f76;
             transition: 0.2s;
         }
 
-        .start-btn:active { transform: translateY(4px); box-shadow: 0 4px 0 #008f76; }
+        .start-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #008f76; }
 
-        /* Timer Header */
-        #timer-header {
+        /* Timer & Header */
+        #header-bar {
             position: sticky;
             top: 0;
             background: white;
-            padding: 10px;
-            display: none;
-            justify-content: space-around;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            z-index: 999;
-            border-bottom: 4px solid var(--secondary);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            z-index: 1000;
         }
 
-        #time-display {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: var(--error);
-        }
+        #timer { font-size: 1.5rem; font-weight: 800; color: var(--error); }
 
-        /* Content */
-        .main-quiz { display: none; padding: 20px; }
-
-        header {
-            text-align: center;
-            background: white;
-            padding: 10px;
-            border-radius: 20px;
-            box-shadow: 0 4px 0 #ddd;
-            max-width: 600px;
-            margin: 20px auto;
-        }
-
-        .container { max-width: 800px; margin: 0 auto; padding-bottom: 100px; }
-
+        /* Quiz Container */
+        .container { max-width: 800px; margin: 30px auto; padding: 0 20px; }
         .card {
             background: white;
             border-radius: 25px;
-            padding: 30px;
+            padding: 25px;
             margin-bottom: 30px;
-            box-shadow: 0 10px 0 #e0e0e0;
+            box-shadow: 0 8px 0 #e0e0e0;
             position: relative;
         }
 
-        .question-text { font-size: 1.1rem; font-weight: 700; display: block; margin-bottom: 20px; }
+        .section-title { color: var(--primary); border-bottom: 3px solid var(--secondary); display: inline-block; margin-bottom: 20px; }
 
-        /* Multi Choice Buttons */
-        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .btn-opt {
-            background: white; border: 2px solid #e0e0e0; border-radius: 20px;
-            padding: 15px; font-family: inherit; font-weight: 600; cursor: pointer;
-            box-shadow: 0 6px 0 #e0e0e0; transition: 0.2s; text-align: left;
+        /* Question Styles */
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
+        .option-btn {
+            background: white;
+            border: 2px solid #eee;
+            padding: 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+            box-shadow: 0 5px 0 #eee;
+            transition: 0.2s;
+            text-align: left;
         }
-        .btn-opt:hover:not(:disabled) { transform: scale(1.02); background: #f8f9fa; }
-        .btn-opt.selected { border-color: var(--primary); background: #f3ebff; }
-        .btn-opt.correct { background: var(--success) !important; color: white; border-color: #00a352; box-shadow: 0 6px 0 #008141; }
-        .btn-opt.wrong { background: var(--error) !important; color: white; border-color: #d63031; box-shadow: 0 6px 0 #af2323; animation: shake 0.4s; }
+
+        .option-btn:hover:not(:disabled) { transform: scale(1.02); background: #f9f9f9; }
+        .option-btn.selected { border-color: var(--primary); background: #f3ebff; }
+        .option-btn.correct { background: var(--success) !important; color: white; border-color: #00a352; box-shadow: 0 5px 0 #008141; }
+        .option-btn.wrong { background: var(--error) !important; color: white; border-color: #d63031; box-shadow: 0 5px 0 #af2323; animation: shake 0.4s; }
 
         input[type="text"] {
-            width: 100%; padding: 15px; border: 2px solid #e0e0e0; border-radius: 15px;
-            font-size: 1rem; font-family: inherit; outline: none; box-sizing: border-box;
+            width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 12px; font-family: inherit; font-size: 1rem;
         }
 
         .explanation {
-            display: none; margin-top: 20px; padding: 20px; background: #fdf2ff;
-            border-left: 5px solid var(--primary); border-radius: 10px; font-size: 0.95rem;
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background: #fdf2ff;
+            border-left: 5px solid var(--primary);
+            border-radius: 10px;
+            animation: fadeIn 0.5s;
         }
 
-        .check-btn {
-            margin-top: 15px; background: var(--secondary); color: white; border: none;
-            padding: 10px 25px; border-radius: 15px; font-weight: 700; cursor: pointer;
-            box-shadow: 0 4px 0 #008f76;
+        /* Anti-cheat overlay */
+        #cheat-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 71, 87, 0.98);
+            z-index: 20000;
+            color: white;
+            text-align: center;
+            padding-top: 100px;
         }
 
-        #anti-cheat-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); z-index: 9999; color: white; text-align: center; padding-top: 20%;
+        /* Footer */
+        .sticky-footer {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: white;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
         }
 
-        .footer {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            background: white; padding: 15px; display: flex; justify-content: center;
-            box-shadow: 0 -5px 15px rgba(0,0,0,0.1); z-index: 100;
+        .submit-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 15px 60px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #5d3985;
         }
 
-        .submit-all {
-            background: var(--primary); color: white; border: none; padding: 15px 50px;
-            font-size: 1.2rem; font-weight: 800; border-radius: 50px; cursor: pointer; box-shadow: 0 6px 0 #5d3985;
-        }
-
-        .glossary-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        .glossary-table th { background: var(--secondary); color: white; padding: 10px; }
-        .glossary-table td { border: 1px solid #eee; padding: 10px; text-align: center; }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            75% { transform: translateX(10px); }
-        }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
 <div id="start-screen">
-    <h1>CHÀO MỪNG CON ĐẾN VỚI LỚP CÔ HẢI!</h1>
-    <p>Bài kiểm tra: <b>Từ vựng & Ngữ pháp Tổng hợp</b></p>
-    <p>Thời gian: <b>30 phút</b></p>
-    <button class="start-btn" onclick="startQuiz()">BẮT ĐẦU LÀM BÀI</button>
-</div>
-
-<div id="timer-header">
-    <div>Học sinh: <b>Đang làm bài...</b></div>
-    <div id="time-display">30:00</div>
-</div>
-
-<div id="anti-cheat-overlay">
-    <h1>⚠️ CẢNH BÁO GIAN LẬN!</h1>
-    <p>Con đã thoát khỏi trang làm bài. Quay lại ngay!</p>
-    <button onclick="document.getElementById('anti-cheat-overlay').style.display='none'" class="check-btn">QUAY LẠI</button>
-</div>
-
-<div class="main-quiz" id="main-content">
-    <header>
-        <h2>Giáo viên tạo: Ms Hải</h2>
-        <h1>ENGLISH CHALLENGE</h1>
-    </header>
-
-    <div class="container">
-        <div class="card">
-            <span class="question-text">I. Give the correct form of the word in brackets:</span>
-            <div id="q1">
-                <p>1. Many people in developing countries still live in extreme _______________. (POOR)</p>
-                <input type="text" id="ans-1" class="timed-input">
-                <button class="check-btn" onclick="checkAnswer(1, 'poverty')">LƯU & CHECK</button>
-                <div class="explanation" id="exp-1">
-                    <strong>Giải thích từ Ms Hải:</strong><br>
-                    - Bước 1: Dịch câu: Nhiều người ở các nước đang phát triển sống trong cảnh nghèo khổ cùng cực.<br>
-                    - Bước 2: POOR (adj): nghèo.<br>
-                    - Bước 3: Sau "extreme" (adj) ta cần một danh từ (Noun).<br>
-                    - Bước 4: <b>Poverty</b> (n) là sự nghèo khổ.
-                </div>
-            </div>
-        </div>
-
-        <div class="card">
-            <span class="question-text">II. Multiple Choice:</span>
-            <div id="q5">
-                <p>5. Could you tell me who is in _______________ of the department, please?</p>
-                <div class="options-grid">
-                    <button class="btn-opt" onclick="select(5, 'A')">A. responsibility</button>
-                    <button class="btn-opt" onclick="select(5, 'B')">B. charge</button>
-                    <button class="btn-opt" onclick="select(5, 'C')">C. rule</button>
-                    <button class="btn-opt" onclick="select(5, 'D')">D. organization</button>
-                </div>
-                <button class="check-btn" onclick="checkMulti(5, 'B')">LƯU & CHECK</button>
-                <div class="explanation" id="exp-5">
-                    <strong>Giải thích từ Ms Hải:</strong><br>
-                    - Bước 1: Dịch câu: Ai phụ trách bộ phận này?<br>
-                    - Bước 2: A. Trách nhiệm; B. Phụ trách; C. Luật; D. Tổ chức.<br>
-                    - Bước 3: Cấu trúc <b>"in charge of"</b> (phụ trách).<br>
-                    - Bước 4: Responsibility đi với giới từ "for".
-                </div>
-            </div>
-        </div>
-
-        <div class="card">
-            <span class="question-text">III. Reading (The Excuses)</span>
-            <p style="background: #f9f9f9; padding: 15px; border-radius: 10px;">
-                ...Deidre stood up and said that she (1) <b>would</b> love to give a donation, but her house was (2) <b>being</b> painted...
-            </p>
-            <table class="glossary-table">
-                <tr><th>Word</th><th>Type</th><th>Meaning</th></tr>
-                <tr><td>Donate</td><td>v</td><td>Quyên góp</td></tr>
-            </table>
-            <p>(1) <input type="text" id="ans-r1" style="width: 100px"></p>
-            <button class="check-btn" onclick="checkReading()">CHECK PHẦN ĐỌC</button>
-            <div class="explanation" id="exp-reading"><b>Dẫn chứng:</b> Trong câu gián tiếp, lùi thì từ "will" thành "would".</div>
-        </div>
-    </div>
-
-    <div class="footer">
-        <button class="submit-all" onclick="submitFinal()">NỘP BÀI TỔNG</button>
+    <div class="login-card">
+        <h1>Ms Hải English</h1>
+        <p>Nhập tên để bắt đầu bài thi (30 phút)</p>
+        <input type="text" id="student-name" placeholder="Họ và tên của con...">
+        <button class="start-btn" onclick="startQuiz()">LÀM BÀI NGAY 🚀</button>
     </div>
 </div>
 
-<audio id="snd-correct" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
-<audio id="snd-wrong" src="https://www.soundjay.com/misc/sounds/fail-trombone-01.mp3"></audio>
+<div id="cheat-overlay">
+    <h1>⚠️ CẢNH BÁO GIAN LẬN</h1>
+    <p>Con vừa thoát tab! Cô Hải đang theo dõi đó nhé. Quay lại ngay!</p>
+    <button class="start-btn" style="background: white; color: var(--error);" onclick="hideCheat()">CON QUAY LẠI RỒI Ạ</button>
+</div>
+
+<div id="header-bar">
+    <div id="student-info">Học sinh: <b id="display-name">---</b></div>
+    <div id="timer">30:00</div>
+</div>
+
+<div class="container">
+    <div class="card" id="sec-1">
+        <h3 class="section-title">I. VOCABULARY: Word Formation</h3>
+        <div class="question" data-type="input" data-answer="poverty">
+            <p>1. Many people in developing countries still live in extreme _______________. (POOR)</p>
+            <input type="text" class="user-input" placeholder="Your answer...">
+            <div class="explanation">
+                <b>Ms Hải giải thích:</b><br>
+                - Bước 1: Dịch câu: Nhiều người ở các nước đang phát triển vẫn sống trong cảnh cực kỳ nghèo khổ.<br>
+                - Bước 2: Poor (adj): Nghèo.<br>
+                - Bước 3: Sau tính từ "extreme" ta cần một danh từ (Noun).<br>
+                - Bước 4: Danh từ của Poor là <b>Poverty</b>. Các từ khác như poorness không phổ biến bằng.
+            </div>
+        </div>
+        <div class="question" data-type="input" data-answer="assistance" style="margin-top: 20px;">
+            <p>2. The bank manager offered us some financial _______________ when we needed it. (ASSIST)</p>
+            <input type="text" class="user-input" placeholder="Your answer...">
+            <div class="explanation">
+                <b>Ms Hải giải thích:</b><br>
+                - Bước 1: Quản lý ngân hàng đã đề nghị sự hỗ trợ tài chính cho chúng tôi.<br>
+                - Bước 2: Assist (v): Giúp đỡ/Hỗ trợ.<br>
+                - Bước 3: Sau tính từ "financial" cần một danh từ.<br>
+                - Bước 4: Đáp án là <b>Assistance</b> (Sự giúp đỡ). Assistant là người trợ lý (sai ngữ cảnh).
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 class="section-title">II. MULTIPLE CHOICE</h3>
+        <div class="question" data-type="mc" data-answer="B">
+            <p>1. Could you tell me who is in _______________ of the department, please?</p>
+            <div class="options-grid">
+                <button class="option-btn" onclick="selectOpt(this, 'A')">A. responsibility</button>
+                <button class="option-btn" onclick="selectOpt(this, 'B')">B. charge</button>
+                <button class="option-btn" onclick="selectOpt(this, 'C')">C. rule</button>
+                <button class="option-btn" onclick="selectOpt(this, 'D')">D. organization</button>
+            </div>
+            <div class="explanation">
+                <b>Ms Hải giải thích:</b><br>
+                - Bước 1: Bạn có thể cho biết ai là người phụ trách bộ phận này không?<br>
+                - Bước 2: A. Trách nhiệm; B. Phụ trách; C. Quy tắc; D. Tổ chức.<br>
+                - Bước 3: Cấu trúc <b>"in charge of"</b> (phụ trách/chịu trách nhiệm).<br>
+                - Bước 4: Responsibility đi với "for". Rule và Organization sai nghĩa.
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 class="section-title">III. READING COMPREHENSION: The Excuses</h3>
+        <p>The office was silent. Alison asked why no one was willing to donate money for Mr. Bartlett’s gift. Deidre stood up and said that she (1) _______________ love to give a donation, but her house was (2) _______________ painted that week and she didn't have any spare cash...</p>
+        <div class="question" data-type="input" data-answer="would">
+            <p>(1)</p><input type="text" class="user-input">
+            <div class="explanation">Dẫn chứng: "said that she <b>would</b> love to..." (Dịch: Nói rằng cô ấy sẽ rất thích quyên góp - Câu gián tiếp lùi thì từ 'will').</div>
+        </div>
+        <div class="question" data-type="input" data-answer="being" style="margin-top: 10px;">
+            <p>(2)</p><input type="text" class="user-input">
+            <div class="explanation">Dẫn chứng: "house was <b>being</b> painted" (Dịch: Nhà đang được sơn - Thể bị động thì quá khứ tiếp diễn).</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 class="section-title">IV. SENTENCE TRANSFORMATION</h3>
+        <div class="question" data-type="input" data-answer="Jerry said that he would the following month">
+            <p>"I'll be travelling round Europe next month," said Jerry. (FOLLOWING)</p>
+            <p>→ Jerry said that ____________________ be travelling round Europe.</p>
+            <input type="text" class="user-input">
+            <div class="explanation">
+                <b>Ms Hải giải thích:</b><br>
+                - Đáp án đúng: <b>he would the following month</b><br>
+                - Tại sao: Chuyển từ câu trực tiếp sang gián tiếp: I -> he; will -> would; next month -> the following month.
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="sticky-footer">
+    <button class="submit-btn" onclick="finishQuiz()">NỘP BÀI TẤT CẢ 🏆</button>
+</div>
+
+<audio id="snd-ding" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
+<audio id="snd-ohno" src="https://www.soundjay.com/misc/sounds/fail-trombone-01.mp3"></audio>
 
 <script>
-    let timeLeft = 30 * 60; // 30 minutes in seconds
-    let timerId;
-    let quizSubmitted = false;
-    let multiAnswers = {};
+    let timeLeft = 30 * 60;
+    let timerInterval;
+    let studentName = "";
+    let startTime;
 
     function startQuiz() {
+        const nameInput = document.getElementById('student-name');
+        if (!nameInput.value.trim()) {
+            alert("Con hãy nhập tên trước nhé!");
+            return;
+        }
+        studentName = nameInput.value;
+        document.getElementById('display-name').innerText = studentName;
         document.getElementById('start-screen').style.display = 'none';
-        document.getElementById('timer-header').style.display = 'flex';
-        document.getElementById('main-content').style.display = 'block';
+        startTime = new Date().toLocaleTimeString();
+        
+        // Full screen request
+        const docEl = document.documentElement;
+        if (docEl.requestFullscreen) docEl.requestFullscreen();
+
         startTimer();
     }
 
     function startTimer() {
-        timerId = setInterval(() => {
+        timerInterval = setInterval(() => {
             timeLeft--;
-            updateTimerDisplay();
+            let mins = Math.floor(timeLeft / 60);
+            let secs = timeLeft % 60;
+            document.getElementById('timer').innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
             if (timeLeft <= 0) {
-                clearInterval(timerId);
-                submitFinal(true); // Auto-submit
+                clearInterval(timerInterval);
+                finishQuiz();
             }
         }, 1000);
     }
 
-    function updateTimerDisplay() {
-        const minutes = Math.floor(timeLeft / 60);
-        const seconds = timeLeft % 60;
-        document.getElementById('time-display').innerText = 
-            `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-        if (timeLeft < 60) document.getElementById('time-display').style.color = 'red';
-    }
-
-    // Anti-Cheat
-    window.addEventListener('blur', () => {
-        if(!quizSubmitted) document.getElementById('anti-cheat-overlay').style.display = 'block';
+    // Anti-cheat
+    document.addEventListener("visibilitychange", () => {
+        if (document.hidden) document.getElementById('cheat-overlay').style.display = 'block';
     });
+    function hideCheat() { document.getElementById('cheat-overlay').style.display = 'none'; }
 
-    function select(qId, val) {
-        if(quizSubmitted) return;
-        multiAnswers[qId] = val;
-        const btns = document.querySelectorAll(`#q${qId} .btn-opt`);
-        btns.forEach(b => {
+    function selectOpt(btn, val) {
+        const parent = btn.closest('.options-grid');
+        parent.querySelectorAll('.option-btn').forEach(b => {
             b.classList.remove('selected');
-            if(b.innerText.startsWith(val)) b.classList.add('selected');
+            b.dataset.selected = "false";
         });
+        btn.classList.add('selected');
+        btn.dataset.selected = "true";
+        btn.dataset.val = val;
     }
 
-    function checkAnswer(id, correct) {
-        const input = document.getElementById('ans-' + id);
-        const exp = document.getElementById('exp-' + id);
-        if(input.value.toLowerCase().trim() === correct) {
-            input.style.borderColor = "var(--success)";
-            playCorrect();
-        } else {
-            input.style.borderColor = "var(--error)";
-            playWrong();
-        }
-        exp.style.display = "block";
-    }
+    function finishQuiz() {
+        clearInterval(timerInterval);
+        let score = 0;
+        let total = document.querySelectorAll('.question').length;
+        const questions = document.querySelectorAll('.question');
 
-    function checkMulti(id, correct) {
-        const exp = document.getElementById('exp-' + id);
-        const btns = document.querySelectorAll(`#q${id} .btn-opt`);
-        btns.forEach(b => {
-            b.disabled = true;
-            if(b.innerText.startsWith(correct)) b.classList.add('correct');
-            else if(b.classList.contains('selected')) b.classList.add('wrong');
+        questions.forEach(q => {
+            const type = q.dataset.type;
+            const correct = q.dataset.answer.toLowerCase().trim();
+            let userAns = "";
+
+            if (type === 'input') {
+                userAns = q.querySelector('.user-input').value.toLowerCase().trim();
+                if (userAns === correct) score++;
+                q.querySelector('.user-input').style.borderColor = (userAns === correct) ? 'var(--success)' : 'var(--error)';
+            } else {
+                const selected = q.querySelector('.option-btn.selected');
+                userAns = selected ? selected.dataset.val : "";
+                if (userAns === correct) score++;
+                
+                q.querySelectorAll('.option-btn').forEach(b => {
+                    if (b.innerText.startsWith(correct)) b.classList.add('correct');
+                    if (b.classList.contains('selected') && userAns !== correct) b.classList.add('wrong');
+                    b.disabled = true;
+                });
+            }
+            q.querySelector('.explanation').style.display = "block";
         });
-        exp.style.display = "block";
-        if(multiAnswers[id] === correct) playCorrect(); else playWrong();
+
+        const percent = (score / total) * 100;
+        let comment = percent >= 80 ? "Xuất sắc! Cô Hải rất tự hào về con!" : "Cố gắng lên nhé, xem lời giải của cô để tiến bộ nha!";
+        
+        if (percent >= 80) triggerConfetti();
+        if (percent < 50) document.getElementById('snd-ohno').play(); else document.getElementById('snd-ding').play();
+
+        alert(`Hết giờ/Nộp bài thành công!\nĐiểm của ${studentName}: ${score}/${total}\n${comment}`);
+        exportToExcel(score, total);
     }
 
-    function playCorrect() {
-        document.getElementById('snd-correct').play();
-        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+    function triggerConfetti() {
+        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
     }
 
-    function playWrong() {
-        document.getElementById('snd-wrong').play();
-    }
-
-    function submitFinal(isAuto = false) {
-        if(quizSubmitted) return;
-        quizSubmitted = true;
-        clearInterval(timerId);
-        
-        // Khóa toàn bộ input
-        document.querySelectorAll('input, button:not(.check-btn)').forEach(el => el.disabled = true);
-        
-        const msg = isAuto ? "HẾT GIỜ RỒI! Hệ thống đã tự động thu bài." : "Chúc mừng con đã hoàn thành bài thi!";
-        alert(msg);
-        
-        // Tự động hiện tất cả đáp án đúng và giải thích
-        document.querySelectorAll('.explanation').forEach(el => el.style.display = 'block');
-        window.scrollTo(0,0);
+    function exportToExcel(score, total) {
+        const data = [
+            ["Tên Học Sinh", "Thời Gian Nộp", "Số Câu Đúng", "Tổng Số Câu", "Phần Trăm"],
+            [studentName, new Date().toLocaleString(), score, total, (score/total*100).toFixed(2) + "%"]
+        ];
+        const ws = XLSX.utils.aoa_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Kết quả");
+        XLSX.writeFile(wb, `KetQua_${studentName}.xlsx`);
     }
 </script>
-
 </body>
 </html>
