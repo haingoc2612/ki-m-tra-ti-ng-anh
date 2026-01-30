@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>English Test - Ms Hải</title>
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <title>English Test Unit 21 & 22 - Ms Hải</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -14,380 +14,581 @@
             --success: #00D26A;
             --error: #FF4757;
             --warning: #FFD32A;
-            --bg: #f0f7ff;
+            --bg: #fdf2f8;
         }
 
         body {
-            font-family: 'Quicksand', sans-serif;
+            font-family: 'Nunito', sans-serif;
             background-color: var(--bg);
             background-image: radial-gradient(var(--primary) 0.5px, transparent 0.5px), radial-gradient(var(--secondary) 0.5px, var(--bg) 0.5px);
-            background-size: 20px 20px;
-            margin: 0;
+            background-size: 25px 25px;
+            margin: 0; padding: 0;
             overflow-x: hidden;
-            color: #2d3436;
+            -webkit-user-select: none; user-select: none;
         }
 
-        /* Login & Start Screen */
+        /* Anti-Cheat Layer */
+        #anti-cheat-layer {
+            display: none; position: fixed; inset: 0; background: rgba(255, 71, 87, 0.98);
+            color: white; z-index: 10000; flex-direction: column; justify-content: center;
+            align-items: center; text-align: center; font-size: 1.5rem; font-weight: 800;
+        }
+
+        /* Start Screen */
         #start-screen {
-            position: fixed;
-            inset: 0;
-            background: var(--primary);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-            color: white;
-            text-align: center;
+            position: fixed; inset: 0; background: var(--primary);
+            z-index: 9999; display: flex; justify-content: center; align-items: center;
+        }
+        .login-box {
+            background: white; padding: 40px; border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); text-align: center; width: 90%; max-width: 450px;
+        }
+        .login-box input {
+            width: 100%; padding: 15px; border: 2px solid #e0e0e0; border-radius: 20px;
+            font-family: inherit; font-size: 1.1rem; margin-bottom: 20px; box-sizing: border-box;
         }
 
-        .login-card {
-            background: white;
-            padding: 40px;
-            border-radius: 30px;
-            color: #333;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            width: 90%;
-            max-width: 400px;
+        /* Header */
+        header {
+            background: white; padding: 10px 30px; position: sticky; top: 0;
+            z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            display: flex; justify-content: space-between; align-items: center;
         }
+        .timer-box { font-size: 1.5rem; font-weight: 800; color: var(--error); background: #fff0f0; padding: 5px 20px; border-radius: 15px; border: 2px solid var(--error); }
 
-        .login-card h1 { color: var(--primary); margin-bottom: 20px; }
-        .login-card input {
-            width: 100%;
-            padding: 15px;
-            margin: 15px 0;
-            border: 2px solid #eee;
-            border-radius: 15px;
-            font-family: inherit;
-            box-sizing: border-box;
-        }
-
-        .start-btn {
-            background: var(--secondary);
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            border-radius: 50px;
-            font-size: 1.2rem;
-            font-weight: 700;
-            cursor: pointer;
-            box-shadow: 0 6px 0 #008f76;
-            transition: 0.2s;
-        }
-
-        .start-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #008f76; }
-
-        /* Timer & Header */
-        #header-bar {
-            position: sticky;
-            top: 0;
-            background: white;
-            padding: 10px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            z-index: 1000;
-        }
-
-        #timer { font-size: 1.5rem; font-weight: 800; color: var(--error); }
-
-        /* Quiz Container */
-        .container { max-width: 800px; margin: 30px auto; padding: 0 20px; }
+        /* Container & Cards */
+        .container { max-width: 900px; margin: 30px auto; padding: 0 20px 150px; }
         .card {
-            background: white;
-            border-radius: 25px;
-            padding: 25px;
-            margin-bottom: 30px;
-            box-shadow: 0 8px 0 #e0e0e0;
-            position: relative;
+            background: white; border-radius: 25px; padding: 30px; margin-bottom: 30px;
+            box-shadow: 0 8px 0 #e0e0e0; position: relative; border: 2px solid #f0f0f0;
         }
+        .section-title { color: var(--primary); border-bottom: 4px solid var(--secondary); display: inline-block; margin-bottom: 25px; font-weight: 800; text-transform: uppercase; }
 
-        .section-title { color: var(--primary); border-bottom: 3px solid var(--secondary); display: inline-block; margin-bottom: 20px; }
-
-        /* Question Styles */
-        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
+        /* Interactive Elements */
+        .q-text { font-size: 1.15rem; font-weight: 700; margin-bottom: 15px; color: #2d3436; }
         .option-btn {
-            background: white;
-            border: 2px solid #eee;
-            padding: 15px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-family: inherit;
-            font-weight: 600;
-            box-shadow: 0 5px 0 #eee;
-            transition: 0.2s;
-            text-align: left;
+            display: block; width: 100%; padding: 15px 20px; margin: 12px 0;
+            background: white; border: 2px solid #e0e0e0; border-radius: 20px;
+            text-align: left; font-family: inherit; font-size: 1rem; font-weight: 700;
+            cursor: pointer; box-shadow: 0 5px 0 #e0e0e0; transition: 0.2s;
         }
-
         .option-btn:hover:not(:disabled) { transform: scale(1.02); background: #f9f9f9; }
         .option-btn.selected { border-color: var(--primary); background: #f3ebff; }
         .option-btn.correct { background: var(--success) !important; color: white; border-color: #00a352; box-shadow: 0 5px 0 #008141; }
         .option-btn.wrong { background: var(--error) !important; color: white; border-color: #d63031; box-shadow: 0 5px 0 #af2323; animation: shake 0.4s; }
 
-        input[type="text"] {
-            width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 12px; font-family: inherit; font-size: 1rem;
-        }
+        .check-btn { background: var(--secondary); color: white; border: none; padding: 10px 25px; border-radius: 15px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 0 #008f76; margin-top: 10px; }
+        .explanation { display: none; margin-top: 20px; padding: 20px; background: #fdf2ff; border-left: 6px solid var(--primary); border-radius: 15px; font-size: 0.95rem; line-height: 1.6; animation: fadeIn 0.5s; }
 
-        .explanation {
-            display: none;
-            margin-top: 20px;
-            padding: 15px;
-            background: #fdf2ff;
-            border-left: 5px solid var(--primary);
-            border-radius: 10px;
-            animation: fadeIn 0.5s;
-        }
-
-        /* Anti-cheat overlay */
-        #cheat-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(255, 71, 87, 0.98);
-            z-index: 20000;
-            color: white;
-            text-align: center;
-            padding-top: 100px;
-        }
+        input[type="text"] { width: 100%; padding: 15px; border: 2px solid #e0e0e0; border-radius: 20px; font-family: inherit; font-size: 1rem; box-sizing: border-box; }
 
         /* Footer */
-        .sticky-footer {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            background: white;
-            padding: 15px;
-            display: flex;
-            justify-content: center;
-            box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
-        }
+        .footer { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 20px; display: flex; justify-content: center; box-shadow: 0 -5px 15px rgba(0,0,0,0.1); z-index: 1000; }
+        .submit-all { background: var(--primary); color: white; border: none; padding: 18px 80px; border-radius: 50px; font-size: 1.3rem; font-weight: 800; cursor: pointer; box-shadow: 0 6px 0 #5d3985; transition: 0.2s; }
+        .submit-all:hover { transform: translateY(-3px); box-shadow: 0 9px 0 #5d3985; }
 
-        .submit-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 15px 60px;
-            border-radius: 50px;
-            font-size: 1.2rem;
-            font-weight: 800;
-            cursor: pointer;
-            box-shadow: 0 6px 0 #5d3985;
-        }
-
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-10px);} 75% {transform: translateX(10px);} }
+        @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
+        .warning-card { border: 3px solid var(--warning) !important; background: #fffdf2 !important; }
     </style>
 </head>
 <body>
 
+<div id="anti-cheat-layer">
+    <h1>⚠️ CẢNH BÁO GIAN LẬN!</h1>
+    <p>Con đã thoát khỏi bài thi! Quay lại ngay lập tức.</p>
+    <button class="check-btn" style="background: white; color: var(--error);" onclick="hideCheat()">Con cam kết không gian lận ạ!</button>
+</div>
+
 <div id="start-screen">
-    <div class="login-card">
-        <h1>Ms Hải English</h1>
-        <p>Nhập tên để bắt đầu bài thi (30 phút)</p>
+    <div class="login-box">
+        <h1 style="color:var(--primary); margin-top: 0;">LỚP CÔ HẢI 🌟</h1>
+        <p>Kiểm tra Unit 21 & 22 (Reported Speech & Money)</p>
         <input type="text" id="student-name" placeholder="Họ và tên của con...">
-        <button class="start-btn" onclick="startQuiz()">LÀM BÀI NGAY 🚀</button>
+        <button class="submit-all" onclick="startQuiz()">BẮT ĐẦU (30 PHÚT) 🚀</button>
     </div>
 </div>
 
-<div id="cheat-overlay">
-    <h1>⚠️ CẢNH BÁO GIAN LẬN</h1>
-    <p>Con vừa thoát tab! Cô Hải đang theo dõi đó nhé. Quay lại ngay!</p>
-    <button class="start-btn" style="background: white; color: var(--error);" onclick="hideCheat()">CON QUAY LẠI RỒI Ạ</button>
-</div>
-
-<div id="header-bar">
-    <div id="student-info">Học sinh: <b id="display-name">---</b></div>
-    <div id="timer">30:00</div>
-</div>
+<header>
+    <div>HS: <b id="display-name">---</b></div>
+    <div class="timer-box" id="time-left">30:00</div>
+</header>
 
 <div class="container">
-    <div class="card" id="sec-1">
-        <h3 class="section-title">I. VOCABULARY: Word Formation</h3>
-        <div class="question" data-type="input" data-answer="poverty">
-            <p>1. Many people in developing countries still live in extreme _______________. (POOR)</p>
-            <input type="text" class="user-input" placeholder="Your answer...">
-            <div class="explanation">
-                <b>Ms Hải giải thích:</b><br>
-                - Bước 1: Dịch câu: Nhiều người ở các nước đang phát triển vẫn sống trong cảnh cực kỳ nghèo khổ.<br>
-                - Bước 2: Poor (adj): Nghèo.<br>
-                - Bước 3: Sau tính từ "extreme" ta cần một danh từ (Noun).<br>
-                - Bước 4: Danh từ của Poor là <b>Poverty</b>. Các từ khác như poorness không phổ biến bằng.
-            </div>
+    <div class="card">
+        <h3 class="section-title">I. VOCABULARY: Labeling</h3>
+        <p><i>receipt • credit card • banknote • discount • checkout</i></p>
+        
+        <div class="q-block" data-ans="credit card">
+            <p class="q-text">1. 💳 (Thẻ dùng để thanh toán thay tiền mặt):</p>
+            <input type="text" placeholder="Nhập từ vựng...">
+            <button class="check-btn" onclick="checkInPlace(this)">CHECK</button>
+            <div class="explanation"><b>Dịch:</b> Thẻ tín dụng. <b>Tại sao đúng:</b> Đây là vật dụng thanh toán không dùng tiền mặt phổ biến.</div>
         </div>
-        <div class="question" data-type="input" data-answer="assistance" style="margin-top: 20px;">
-            <p>2. The bank manager offered us some financial _______________ when we needed it. (ASSIST)</p>
-            <input type="text" class="user-input" placeholder="Your answer...">
-            <div class="explanation">
-                <b>Ms Hải giải thích:</b><br>
-                - Bước 1: Quản lý ngân hàng đã đề nghị sự hỗ trợ tài chính cho chúng tôi.<br>
-                - Bước 2: Assist (v): Giúp đỡ/Hỗ trợ.<br>
-                - Bước 3: Sau tính từ "financial" cần một danh từ.<br>
-                - Bước 4: Đáp án là <b>Assistance</b> (Sự giúp đỡ). Assistant là người trợ lý (sai ngữ cảnh).
-            </div>
+        <hr>
+        <div class="q-block" data-ans="receipt">
+            <p class="q-text">2. 🧾 (Tờ phiếu xác nhận bạn đã trả tiền cho món hàng):</p>
+            <input type="text" placeholder="Nhập từ vựng...">
+            <button class="check-btn" onclick="checkInPlace(this)">CHECK</button>
+            <div class="explanation"><b>Dịch:</b> Hóa đơn/Biên lai. <b>Tại sao đúng:</b> Dùng để xác nhận giao dịch thành công.</div>
+        </div>
+        <hr>
+        <div class="q-block" data-ans="banknote">
+            <p class="q-text">3. 💵 (Tiền làm bằng giấy hoặc polyme):</p>
+            <input type="text" placeholder="Nhập từ vựng...">
+            <button class="check-btn" onclick="checkInPlace(this)">CHECK</button>
+            <div class="explanation"><b>Dịch:</b> Tiền giấy. <b>Tại sao đúng:</b> Khác với coins (tiền xu).</div>
+        </div>
+        <hr>
+        <div class="q-block" data-ans="discount">
+            <p class="q-text">4. 🏷️ -30% (Sự giảm giá so với giá gốc):</p>
+            <input type="text" placeholder="Nhập từ vựng...">
+            <button class="check-btn" onclick="checkInPlace(this)">CHECK</button>
+            <div class="explanation"><b>Dịch:</b> Giảm giá/Chiết khấu. <b>Tại sao đúng:</b> Thể hiện sự giảm bớt về giá bán.</div>
+        </div>
+        <hr>
+        <div class="q-block" data-ans="checkout">
+            <p class="q-text">5. 🛒 (Nơi bạn xếp hàng để thanh toán trong siêu thị):</p>
+            <input type="text" placeholder="Nhập từ vựng...">
+            <button class="check-btn" onclick="checkInPlace(this)">CHECK</button>
+            <div class="explanation"><b>Dịch:</b> Quầy thanh toán. <b>Tại sao đúng:</b> Nơi hoàn tất việc mua sắm.</div>
         </div>
     </div>
 
     <div class="card">
         <h3 class="section-title">II. MULTIPLE CHOICE</h3>
-        <div class="question" data-type="mc" data-answer="B">
-            <p>1. Could you tell me who is in _______________ of the department, please?</p>
-            <div class="options-grid">
-                <button class="option-btn" onclick="selectOpt(this, 'A')">A. responsibility</button>
-                <button class="option-btn" onclick="selectOpt(this, 'B')">B. charge</button>
-                <button class="option-btn" onclick="selectOpt(this, 'C')">C. rule</button>
-                <button class="option-btn" onclick="selectOpt(this, 'D')">D. organization</button>
-            </div>
+        <div class="q-block-mc" data-ans="C">
+            <p class="q-text">6. Tim said he __________ about buying a car for a long time.</p>
+            <button class="option-btn" onclick="sel(this, 'A')">A. thinks</button>
+            <button class="option-btn" onclick="sel(this, 'B')">B. is thinking</button>
+            <button class="option-btn" onclick="sel(this, 'C')">C. had been thinking</button>
+            <button class="option-btn" onclick="sel(this, 'D')">D. has thought</button>
+            <button class="check-btn" onclick="checkInPlaceMC(this)">CHECK</button>
             <div class="explanation">
-                <b>Ms Hải giải thích:</b><br>
-                - Bước 1: Bạn có thể cho biết ai là người phụ trách bộ phận này không?<br>
-                - Bước 2: A. Trách nhiệm; B. Phụ trách; C. Quy tắc; D. Tổ chức.<br>
-                - Bước 3: Cấu trúc <b>"in charge of"</b> (phụ trách/chịu trách nhiệm).<br>
-                - Bước 4: Responsibility đi với "for". Rule và Organization sai nghĩa.
+                <b>Bước 1:</b> Dịch: Tim nói rằng cậu ấy đã đang suy nghĩ về việc mua ô tô trong một thời gian dài.<br>
+                <b>Bước 2:</b> A. nghĩ (HTĐ); B. đang nghĩ (HTTD); C. đã đang nghĩ (QKHTTD); D. đã nghĩ (HTHT).<br>
+                <b>Bước 3:</b> Cấu trúc Reported Speech: Khi động từ dẫn là "said", ta phải lùi thì. Thì gốc là HTHTTD "has been thinking" lùi về <b>QKHTTD</b>.<br>
+                <b>Bước 4:</b> A, B, D chưa lùi thì phù hợp.
+            </div>
+        </div>
+        <hr>
+        <div class="q-block-mc" data-ans="B">
+            <p class="q-text">7. I think you'll find that this car is very __________ to drive.</p>
+            <button class="option-btn" onclick="sel(this, 'A')">A. economic</button>
+            <button class="option-btn" onclick="sel(this, 'B')">B. economical</button>
+            <button class="option-btn" onclick="sel(this, 'C')">C. economy</button>
+            <button class="option-btn" onclick="sel(this, 'D')">D. finance</button>
+            <button class="check-btn" onclick="checkInPlaceMC(this)">CHECK</button>
+            <div class="explanation">
+                <b>Bước 1:</b> Dịch: Tôi nghĩ bạn sẽ thấy chiếc xe này lái rất tiết kiệm.<br>
+                <b>Bước 2:</b> A. thuộc kinh tế; B. tiết kiệm; C. nền kinh tế; D. tài chính.<br>
+                <b>Bước 3:</b> <b>Economical</b> mang nghĩa tiết kiệm tiền bạc/nhiên liệu.<br>
+                <b>Bước 4:</b> Economic dùng cho hệ thống kinh tế quốc gia. C và D là danh từ.
+            </div>
+        </div>
+        <hr>
+        <div class="q-block-mc" data-ans="A">
+            <p class="q-text">8. Julian wanted to know __________ he could meet Doug at six o'clock.</p>
+            <button class="option-btn" onclick="sel(this, 'A')">A. whether</button>
+            <button class="option-btn" onclick="sel(this, 'B')">B. that</button>
+            <button class="option-btn" onclick="sel(this, 'C')">C. what</button>
+            <button class="option-btn" onclick="sel(this, 'D')">D. which</button>
+            <button class="check-btn" onclick="checkInPlaceMC(this)">CHECK</button>
+            <div class="explanation">
+                <b>Bước 1:</b> Dịch: Julian muốn biết liệu anh ấy có thể gặp Doug lúc 6 giờ không.<br>
+                <b>Bước 2:</b> A. liệu rằng; B. rằng; C. cái gì; D. cái nào.<br>
+                <b>Bước 3:</b> Đây là câu hỏi Yes/No gián tiếp, dùng <b>Whether/If</b>.<br>
+                <b>Bước 4:</b> That dùng cho câu kể. What/Which dùng cho câu hỏi có từ để hỏi.
+            </div>
+        </div>
+        <hr>
+        <div class="q-block-mc" data-ans="C">
+            <p class="q-text">9. I try to __________ a little money each month to spend on a holiday.</p>
+            <button class="option-btn" onclick="sel(this, 'A')">A. bank on</button>
+            <button class="option-btn" onclick="sel(this, 'B')">B. get through</button>
+            <button class="option-btn" onclick="sel(this, 'C')">C. put by</button>
+            <button class="option-btn" onclick="sel(this, 'D')">D. come by</button>
+            <button class="check-btn" onclick="checkInPlaceMC(this)">CHECK</button>
+            <div class="explanation">
+                <b>Bước 1:</b> Dịch: Tôi cố gắng để dành một ít tiền mỗi tháng để đi nghỉ mát.<br>
+                <b>Bước 2:</b> A. dựa dẫm; B. hoàn thành/vượt qua; C. để dành; D. có được.<br>
+                <b>Bước 3:</b> <b>Put by</b> = save money for later (tiết kiệm/để dành).<br>
+                <b>Bước 4:</b> Các cụm động từ khác không mang nghĩa tiết kiệm tiền.
+            </div>
+        </div>
+        <hr>
+        <div class="q-block-mc" data-ans="D">
+            <p class="q-text">10. The hotel __________ us £50 for using the swimming pool.</p>
+            <button class="option-btn" onclick="sel(this, 'A')">A. cost</button>
+            <button class="option-btn" onclick="sel(this, 'B')">B. paid</button>
+            <button class="option-btn" onclick="sel(this, 'C')">C. spent</button>
+            <button class="option-btn" onclick="sel(this, 'D')">D. charged</button>
+            <button class="check-btn" onclick="checkInPlaceMC(this)">CHECK</button>
+            <div class="explanation">
+                <b>Bước 1:</b> Dịch: Khách sạn đã thu chúng tôi 50 bảng phí sử dụng bể bơi.<br>
+                <b>Bước 2:</b> A. trị giá; B. trả; C. tiêu; D. thu phí.<br>
+                <b>Bước 3:</b> Cấu trúc: <b>Charge someone money for something</b> (Thu phí ai bao nhiêu cho việc gì).<br>
+                <b>Bước 4:</b> Cost đi với vật làm chủ ngữ. Paid/Spent dùng sai cấu trúc giới từ.
+            </div>
+        </div>
+        <hr>
+        <div class="q-block-mc" data-ans="B">
+            <p class="q-text">11. Our teacher said that Shakespeare __________ the greatest English writer.</p>
+            <button class="option-btn" onclick="sel(this, 'A')">A. is</button>
+            <button class="option-btn" onclick="sel(this, 'B')">B. was</button>
+            <button class="option-btn" onclick="sel(this, 'C')">C. has been</button>
+            <button class="option-btn" onclick="sel(this, 'D')">D. will be</button>
+            <button class="check-btn" onclick="checkInPlaceMC(this)">CHECK</button>
+            <div class="explanation">
+                <b>Bước 1:</b> Dịch: Giáo viên nói rằng Shakespeare là nhà văn Anh vĩ đại nhất.<br>
+                <b>Bước 2:</b> A. hiện tại; B. quá khứ; C. HTHT; D. tương lai.<br>
+                <b>Bước 3:</b> Shakespeare sống trong quá khứ nên khi tường thuật lại vẫn dùng <b>was</b>.<br>
+                <b>Bước 4:</b> Is sai vì ông đã mất. Các thì khác không hợp ngữ cảnh.
+            </div>
+        </div>
+        <hr>
+        <div class="q-block-mc" data-ans="B">
+            <p class="q-text">12. My mother suddenly came __________ a fortune when her aunt died.</p>
+            <button class="option-btn" onclick="sel(this, 'A')">A. across</button>
+            <button class="option-btn" onclick="sel(this, 'B')">B. into</button>
+            <button class="option-btn" onclick="sel(this, 'C')">C. by</button>
+            <button class="option-btn" onclick="sel(this, 'D')">D. up</button>
+            <button class="check-btn" onclick="checkInPlaceMC(this)">CHECK</button>
+            <div class="explanation">
+                <b>Bước 1:</b> Dịch: Mẹ tôi bỗng dưng thừa kế một gia tài khi dì của bà qua đời.<br>
+                <b>Bước 2:</b> A. tình cờ gặp; B. thừa kế; C. có được; D. xảy ra.<br>
+                <b>Bước 3:</b> Phrasal verb: <b>Come into</b> = inherit (thừa kế).<br>
+                <b>Bước 4:</b> Come across dùng cho vật/người tình cờ thấy.
+            </div>
+        </div>
+        <hr>
+        <div class="q-block-mc" data-ans="C">
+            <p class="q-text">13. The bank __________ to answer even a simple question about my loan.</p>
+            <button class="option-btn" onclick="sel(this, 'A')">A. denied</button>
+            <button class="option-btn" onclick="sel(this, 'B')">B. suggested</button>
+            <button class="option-btn" onclick="sel(this, 'C')">C. refused</button>
+            <button class="option-btn" onclick="sel(this, 'D')">D. stated</button>
+            <button class="check-btn" onclick="checkInPlaceMC(this)">CHECK</button>
+            <div class="explanation">
+                <b>Bước 1:</b> Dịch: Ngân hàng đã từ chối trả lời dù là câu hỏi đơn giản nhất về khoản vay của tôi.<br>
+                <b>Bước 2:</b> A. phủ nhận; B. gợi ý; C. từ chối; D. phát biểu.<br>
+                <b>Bước 3:</b> Cấu trúc <b>Refuse + to Verb</b> (Từ chối làm gì).<br>
+                <b>Bước 4:</b> Deny/Suggest đi với V-ing. State đi với clause.
+            </div>
+        </div>
+        <hr>
+        <div class="q-block-mc" data-ans="C">
+            <p class="q-text">14. "I'll go shopping tomorrow," said Tim. → Tim said he would go shopping __________.</p>
+            <button class="option-btn" onclick="sel(this, 'A')">A. tomorrow</button>
+            <button class="option-btn" onclick="sel(this, 'B')">B. the day before</button>
+            <button class="option-btn" onclick="sel(this, 'C')">C. the next day</button>
+            <button class="option-btn" onclick="sel(this, 'D')">D. two days ago</button>
+            <button class="check-btn" onclick="checkInPlaceMC(this)">CHECK</button>
+            <div class="explanation">
+                <b>Bước 1:</b> Dịch: "Tôi sẽ đi mua sắm vào ngày mai," Tim nói.<br>
+                <b>Bước 3:</b> Trong câu gián tiếp, <b>tomorrow</b> đổi thành <b>the next day</b> hoặc <b>the following day</b>.<br>
+                <b>Bước 4:</b> A chưa đổi. B là "hôm trước". D là "hai ngày trước".
+            </div>
+        </div>
+        <hr>
+        <div class="q-block-mc" data-ans="B">
+            <p class="q-text">15. Do you have __________ for a fifty-pound note? I need some coins.</p>
+            <button class="option-btn" onclick="sel(this, 'A')">A. cash</button>
+            <button class="option-btn" onclick="sel(this, 'B')">B. change</button>
+            <button class="option-btn" onclick="sel(this, 'C')">C. currency</button>
+            <button class="option-btn" onclick="sel(this, 'D')">D. bill</button>
+            <button class="check-btn" onclick="checkInPlaceMC(this)">CHECK</button>
+            <div class="explanation">
+                <b>Bước 1:</b> Dịch: Bạn có tiền lẻ cho tờ 50 bảng không? Tôi cần mấy đồng xu.<br>
+                <b>Bước 3:</b> <b>Change</b> nghĩa là tiền lẻ/tiền thối lại.<br>
+                <b>Bước 4:</b> Cash là tiền mặt nói chung. Currency là đơn vị tiền tệ. Bill là hóa đơn/tờ tiền giấy.
             </div>
         </div>
     </div>
 
     <div class="card">
-        <h3 class="section-title">III. READING COMPREHENSION: The Excuses</h3>
-        <p>The office was silent. Alison asked why no one was willing to donate money for Mr. Bartlett’s gift. Deidre stood up and said that she (1) _______________ love to give a donation, but her house was (2) _______________ painted that week and she didn't have any spare cash...</p>
-        <div class="question" data-type="input" data-answer="would">
-            <p>(1)</p><input type="text" class="user-input">
-            <div class="explanation">Dẫn chứng: "said that she <b>would</b> love to..." (Dịch: Nói rằng cô ấy sẽ rất thích quyên góp - Câu gián tiếp lùi thì từ 'will').</div>
-        </div>
-        <div class="question" data-type="input" data-answer="being" style="margin-top: 10px;">
-            <p>(2)</p><input type="text" class="user-input">
-            <div class="explanation">Dẫn chứng: "house was <b>being</b> painted" (Dịch: Nhà đang được sơn - Thể bị động thì quá khứ tiếp diễn).</div>
+        <h3 class="section-title">III. CLOZE TEST: Reading</h3>
+        <p style="line-height: 1.8; background: #f9f9f9; padding: 20px; border-radius: 15px; border: 2px dashed var(--primary);">
+            Last week, my friend Sarah told me she (16) _____ planning a big party. She said she (17) _____ a lot of money on decorations (18) _____. I (19) _____ her if she needed any (20) _____, and she admitted that she was (21) _____ of money. I (22) _____ her to look for some (23) _____ in the local shops where things are cheaper.
+        </p>
+        <div id="reading-questions">
+            <div class="q-block-mc" data-ans="B">
+                <p>16.</p>
+                <button class="option-btn" onclick="sel(this, 'A')">A. is</button>
+                <button class="option-btn" onclick="sel(this, 'B')">B. was</button>
+                <button class="option-btn" onclick="sel(this, 'C')">C. has been</button>
+                <button class="option-btn" onclick="sel(this, 'D')">D. will be</button>
+                <div class="explanation"><b>Dẫn chứng:</b> "told me she <b>was</b> planning" (Dịch: nói với tôi cô ấy đang lên kế hoạch). Cấu trúc gián tiếp lùi từ HTTD về QKTD.</div>
+            </div>
+            <div class="q-block-mc" data-ans="C" style="margin-top:20px;">
+                <p>17.</p>
+                <button class="option-btn" onclick="sel(this, 'A')">A. spends</button>
+                <button class="option-btn" onclick="sel(this, 'B')">B. spent</button>
+                <button class="option-btn" onclick="sel(this, 'C')">C. had spent</button>
+                <button class="option-btn" onclick="sel(this, 'D')">D. is spending</button>
+                <div class="explanation"><b>Dẫn chứng:</b> "had spent a lot of money" (Dịch: đã tiêu rất nhiều tiền). Lùi thì từ QKĐ về QKHT.</div>
+            </div>
+            <div class="q-block-mc" data-ans="B" style="margin-top:20px;">
+                <p>18.</p>
+                <button class="option-btn" onclick="sel(this, 'A')">A. yesterday</button>
+                <button class="option-btn" onclick="sel(this, 'B')">B. the day before</button>
+                <button class="option-btn" onclick="sel(this, 'C')">C. tomorrow</button>
+                <button class="option-btn" onclick="sel(this, 'D')">D. following day</button>
+                <div class="explanation"><b>Dẫn chứng:</b> <b>the day before</b> (hôm trước đó). Đổi từ yesterday trong câu gián tiếp.</div>
+            </div>
+            <div class="q-block-mc" data-ans="C" style="margin-top:20px;">
+                <p>19.</p>
+                <button class="option-btn" onclick="sel(this, 'A')">A. said</button>
+                <button class="option-btn" onclick="sel(this, 'B')">B. told</button>
+                <button class="option-btn" onclick="sel(this, 'C')">C. asked</button>
+                <button class="option-btn" onclick="sel(this, 'D')">D. claimed</button>
+                <div class="explanation"><b>Dẫn chứng:</b> "I <b>asked</b> her if..." (Dịch: Tôi đã hỏi cô ấy liệu...). Cấu trúc câu hỏi gián tiếp Yes/No.</div>
+            </div>
+            <div class="q-block-mc" data-ans="B" style="margin-top:20px;">
+                <p>20.</p>
+                <button class="option-btn" onclick="sel(this, 'A')">A. assist</button>
+                <button class="option-btn" onclick="sel(this, 'B')">B. assistance</button>
+                <button class="option-btn" onclick="sel(this, 'C')">C. assistant</button>
+                <button class="option-btn" onclick="sel(this, 'D')">D. assisted</button>
+                <div class="explanation"><b>Dẫn chứng:</b> "needed any <b>assistance</b>" (Dịch: cần bất kỳ sự hỗ trợ nào). Sau "any" + danh từ.</div>
+            </div>
+            <div class="q-block-mc" data-ans="C" style="margin-top:20px;">
+                <p>21.</p>
+                <button class="option-btn" onclick="sel(this, 'A')">A. debt</button>
+                <button class="option-btn" onclick="sel(this, 'B')">B. lack</button>
+                <button class="option-btn" onclick="sel(this, 'C')">C. short</button>
+                <button class="option-btn" onclick="sel(this, 'D')">D. poor</button>
+                <div class="explanation"><b>Dẫn chứng:</b> <b>short of money</b> (Dịch: thiếu tiền). Cụm cố định: be short of something.</div>
+            </div>
+            <div class="q-block-mc" data-ans="A" style="margin-top:20px;">
+                <p>22.</p>
+                <button class="option-btn" onclick="sel(this, 'A')">A. suggested</button>
+                <button class="option-btn" onclick="sel(this, 'B')">B. told</button>
+                <button class="option-btn" onclick="sel(this, 'C')">C. said</button>
+                <button class="option-btn" onclick="sel(this, 'D')">D. ordered</button>
+                <div class="explanation"><b>Dẫn chứng:</b> "I <b>suggested</b> her to..." (Dịch: Tôi gợi ý cô ấy...). Gợi ý hành động.</div>
+            </div>
+            <div class="q-block-mc" data-ans="A" style="margin-top:20px;">
+                <p>23.</p>
+                <button class="option-btn" onclick="sel(this, 'A')">A. bargains</button>
+                <button class="option-btn" onclick="sel(this, 'B')">B. debts</button>
+                <button class="option-btn" onclick="sel(this, 'C')">C. fortunes</button>
+                <button class="option-btn" onclick="sel(this, 'D')">D. bills</button>
+                <div class="explanation"><b>Dịch:</b> "look for some <b>bargains</b>" (tìm món hời). Mua đồ rẻ ở shop địa phương.</div>
+            </div>
         </div>
     </div>
 
     <div class="card">
-        <h3 class="section-title">IV. SENTENCE TRANSFORMATION</h3>
-        <div class="question" data-type="input" data-answer="Jerry said that he would the following month">
-            <p>"I'll be travelling round Europe next month," said Jerry. (FOLLOWING)</p>
-            <p>→ Jerry said that ____________________ be travelling round Europe.</p>
-            <input type="text" class="user-input">
-            <div class="explanation">
-                <b>Ms Hải giải thích:</b><br>
-                - Đáp án đúng: <b>he would the following month</b><br>
-                - Tại sao: Chuyển từ câu trực tiếp sang gián tiếp: I -> he; will -> would; next month -> the following month.
-            </div>
+        <h3 class="section-title">IV. WORD FORMATION</h3>
+        <div class="q-block" data-ans="investment">
+            <p class="q-text">24. Western financial __________ in developing countries is very important. (INVEST)</p>
+            <input type="text" placeholder="Nhập đáp án...">
+            <button class="check-btn" onclick="checkInPlace(this)">CHECK</button>
+            <div class="explanation"><b>Dịch:</b> Sự đầu tư tài chính. <b>Giải thích:</b> Sau tính từ "financial" cần danh từ. <b>Investment</b> là danh từ của Invest.</div>
+        </div>
+        <hr>
+        <div class="q-block" data-ans="poverty">
+            <p class="q-text">25. Millions of people in the world still live in extreme __________. (POOR)</p>
+            <input type="text" placeholder="Nhập đáp án...">
+            <button class="check-btn" onclick="checkInPlace(this)">CHECK</button>
+            <div class="explanation"><b>Dịch:</b> Sự nghèo khổ. <b>Giải thích:</b> Sau tính từ "extreme" cần danh từ. <b>Poverty</b> là danh từ của Poor.</div>
+        </div>
+        <hr>
+        <div class="q-block" data-ans="unacceptable">
+            <p class="q-text">26. The increase in prices at the shop was totally __________. (ACCEPT)</p>
+            <input type="text" placeholder="Nhập đáp án...">
+            <button class="check-btn" onclick="checkInPlace(this)">CHECK</button>
+            <div class="explanation"><b>Dịch:</b> Không thể chấp nhận được. <b>Giải thích:</b> Cần tính từ đứng sau to-be. Tăng giá thường mang nghĩa tiêu cực -> <b>Unacceptable</b>.</div>
+        </div>
+        <hr>
+        <div class="q-block" data-ans="wealthy">
+            <p class="q-text">27. There are many problems connected to being extremely __________. (WEALTH)</p>
+            <input type="text" placeholder="Nhập đáp án...">
+            <button class="check-btn" onclick="checkInPlace(this)">CHECK</button>
+            <div class="explanation"><b>Dịch:</b> Giàu có. <b>Giải thích:</b> Sau trạng từ "extremely" cần tính từ. <b>Wealthy</b> là tính từ của Wealth.</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 class="section-title">V. SENTENCE TRANSFORMATION</h3>
+        <div class="q-block" data-ans="liz said that she had had evan over for dinner the night before">
+            <p class="q-text">28. "I had Evan over for dinner last night," said Liz.</p>
+            <input type="text" placeholder="Viết lại câu: Liz said that...">
+            <button class="check-btn" onclick="checkInPlace(this)">CHECK</button>
+            <div class="explanation"><b>Đáp án đúng:</b> Liz said that she had had Evan over for dinner the night before.<br><b>Phân tích:</b> Lùi thì QKĐ -> QKHT. Đổi last night -> the night before.</div>
+        </div>
+        <hr>
+        <div class="q-block" data-ans="george and kevins father told them that he could pick them up from school">
+            <p class="q-text">29. "I can pick you boys up from school," said their father to George and Kevin.</p>
+            <input type="text" placeholder="Viết lại câu: George and Kevin's father told them that...">
+            <button class="check-btn" onclick="checkInPlace(this)">CHECK</button>
+            <div class="explanation"><b>Đáp án đúng:</b> George and Kevin's father told them that he could pick them up from school.<br><b>Phân tích:</b> Can -> Could. Đổi đại từ I -> he, you -> them.</div>
+        </div>
+        <hr>
+        <div class="q-block" data-ans="i didnt want to be in debt to sue so i didnt borrow any money">
+            <p class="q-text">30. I didn't want to owe Sue money, so I didn't borrow any.</p>
+            <input type="text" placeholder="Viết lại câu: I didn't want to...">
+            <button class="check-btn" onclick="checkInPlace(this)">CHECK</button>
+            <div class="explanation"><b>Đáp án đúng:</b> I didn't want to be in debt to Sue, so I didn't borrow any (money).<br><b>Phân tích:</b> Cấu trúc "be in debt to someone" (mắc nợ ai) đồng nghĩa với "owe someone money".</div>
         </div>
     </div>
 </div>
 
-<div class="sticky-footer">
-    <button class="submit-btn" onclick="finishQuiz()">NỘP BÀI TẤT CẢ 🏆</button>
+<div class="footer"><button class="submit-all" onclick="finishQuiz()">NỘP BÀI TẤT CẢ 🏆</button></div>
+
+<div id="result-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:20000; justify-content:center; align-items:center;">
+    <div class="card" style="text-align:center; max-width:450px; width:90%;">
+        <h1 id="score-display" style="font-size:3.5rem; color:var(--primary); margin:10px 0;">0/30</h1>
+        <p id="feedback-msg" style="font-size:1.2rem; font-weight:700;"></p>
+        <button class="submit-all" style="margin-top:20px;" onclick="location.reload()">LÀM LẠI 🔄</button>
+    </div>
+</div>
+
+<div id="anti-cheat" style="display:none; position:fixed; inset:0; background:rgba(255, 71, 87, 0.98); color:white; z-index:10000; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding: 20px;">
+    <h1>⚠️ CẢNH BÁO GIAN LẬN!</h1>
+    <p>Con đã thoát khỏi bài thi! Quay lại ngay lập tức.</p>
+    <button class="check-btn" style="background: white; color: var(--error);" onclick="document.getElementById('anti-cheat').style.display='none'">Con cam kết không gian lận!</button>
 </div>
 
 <audio id="snd-ding" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
-<audio id="snd-ohno" src="https://www.soundjay.com/misc/sounds/fail-trombone-01.mp3"></audio>
+<audio id="snd-wrong" src="https://www.soundjay.com/misc/sounds/fail-trombone-01.mp3"></audio>
 
 <script>
-    let timeLeft = 30 * 60;
-    let timerInterval;
+    let timeLeft = 1800;
+    let timerId;
     let studentName = "";
     let startTime;
+    let quizActive = false;
+    let resultsLog = [];
 
     function startQuiz() {
         const nameInput = document.getElementById('student-name');
-        if (!nameInput.value.trim()) {
-            alert("Con hãy nhập tên trước nhé!");
-            return;
-        }
+        if (!nameInput.value.trim()) { alert("Nhập tên đã con ơi!"); return; }
         studentName = nameInput.value;
         document.getElementById('display-name').innerText = studentName;
         document.getElementById('start-screen').style.display = 'none';
-        startTime = new Date().toLocaleTimeString();
+        startTime = new Date().toLocaleString();
+        quizActive = true;
         
-        // Full screen request
         const docEl = document.documentElement;
         if (docEl.requestFullscreen) docEl.requestFullscreen();
-
+        
         startTimer();
     }
 
     function startTimer() {
-        timerInterval = setInterval(() => {
+        timerId = setInterval(() => {
+            if(!quizActive) return;
             timeLeft--;
             let mins = Math.floor(timeLeft / 60);
             let secs = timeLeft % 60;
-            document.getElementById('timer').innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-            if (timeLeft <= 0) {
-                clearInterval(timerInterval);
-                finishQuiz();
-            }
+            document.getElementById('time-left').innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+            if (timeLeft <= 0) { clearInterval(timerId); finishQuiz(); }
         }, 1000);
     }
 
-    // Anti-cheat
     document.addEventListener("visibilitychange", () => {
-        if (document.hidden) document.getElementById('cheat-overlay').style.display = 'block';
+        if (document.hidden && quizActive) document.getElementById('anti-cheat').style.display = 'flex';
     });
-    function hideCheat() { document.getElementById('cheat-overlay').style.display = 'none'; }
 
-    function selectOpt(btn, val) {
-        const parent = btn.closest('.options-grid');
-        parent.querySelectorAll('.option-btn').forEach(b => {
-            b.classList.remove('selected');
-            b.dataset.selected = "false";
-        });
+    function sel(btn, val) {
+        const parent = btn.parentElement;
+        parent.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
         btn.classList.add('selected');
-        btn.dataset.selected = "true";
         btn.dataset.val = val;
     }
 
+    function checkInPlace(btn) {
+        const block = btn.parentElement;
+        const input = block.querySelector('input');
+        const correct = block.dataset.ans.toLowerCase();
+        const exp = block.querySelector('.explanation');
+        
+        if (input.value.toLowerCase().trim().replace(/\s+/g, ' ') === correct) {
+            input.style.borderColor = "var(--success)";
+            document.getElementById('snd-ding').play();
+            confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 } });
+        } else {
+            input.style.borderColor = "var(--error)";
+            document.getElementById('snd-wrong').play();
+        }
+        exp.style.display = "block";
+    }
+
+    function checkInPlaceMC(btn) {
+        const block = btn.parentElement;
+        const correct = block.dataset.ans;
+        const selected = block.querySelector('.option-btn.selected');
+        const exp = block.querySelector('.explanation');
+        
+        block.querySelectorAll('.option-btn').forEach(b => {
+            if(b.innerText.startsWith(correct)) b.classList.add('correct');
+            if(b.classList.contains('selected') && !b.innerText.startsWith(correct)) b.classList.add('wrong');
+            b.disabled = true;
+        });
+
+        if (selected && selected.dataset.val === correct) {
+            document.getElementById('snd-ding').play();
+            confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 } });
+        } else {
+            document.getElementById('snd-wrong').play();
+        }
+        exp.style.display = "block";
+    }
+
     function finishQuiz() {
-        clearInterval(timerInterval);
+        quizActive = false;
+        clearInterval(timerId);
         let score = 0;
-        let total = document.querySelectorAll('.question').length;
-        const questions = document.querySelectorAll('.question');
+        const total = 30;
 
-        questions.forEach(q => {
-            const type = q.dataset.type;
-            const correct = q.dataset.answer.toLowerCase().trim();
-            let userAns = "";
+        document.querySelectorAll('.q-block, .q-block-mc').forEach(q => {
+            const correct = q.dataset.ans;
+            const exp = q.querySelector('.explanation');
+            exp.style.display = "block";
 
-            if (type === 'input') {
-                userAns = q.querySelector('.user-input').value.toLowerCase().trim();
-                if (userAns === correct) score++;
-                q.querySelector('.user-input').style.borderColor = (userAns === correct) ? 'var(--success)' : 'var(--error)';
+            if(q.classList.contains('q-block')) {
+                const input = q.querySelector('input');
+                if(input.value.toLowerCase().trim().replace(/\s+/g, ' ') === correct.toLowerCase()) score++;
+                else if(!input.value) q.classList.add('warning-card');
             } else {
-                const selected = q.querySelector('.option-btn.selected');
-                userAns = selected ? selected.dataset.val : "";
-                if (userAns === correct) score++;
+                const sel = q.querySelector('.option-btn.selected');
+                if(sel && sel.dataset.val === correct) score++;
+                else if(!sel) q.classList.add('warning-card');
                 
                 q.querySelectorAll('.option-btn').forEach(b => {
-                    if (b.innerText.startsWith(correct)) b.classList.add('correct');
-                    if (b.classList.contains('selected') && userAns !== correct) b.classList.add('wrong');
+                    if(b.innerText.startsWith(correct)) b.classList.add('correct');
                     b.disabled = true;
                 });
             }
-            q.querySelector('.explanation').style.display = "block";
         });
 
-        const percent = (score / total) * 100;
-        let comment = percent >= 80 ? "Xuất sắc! Cô Hải rất tự hào về con!" : "Cố gắng lên nhé, xem lời giải của cô để tiến bộ nha!";
+        document.getElementById('score-display').innerText = `${score}/${total}`;
+        document.getElementById('feedback-msg').innerText = score >= 24 ? "Tuyệt vời! Con đúng là thiên tài! 🌟" : "Cố gắng lên nhé! Xem kỹ giải thích để giỏi hơn! 💪";
+        document.getElementById('result-modal').style.display = "flex";
         
-        if (percent >= 80) triggerConfetti();
-        if (percent < 50) document.getElementById('snd-ohno').play(); else document.getElementById('snd-ding').play();
-
-        alert(`Hết giờ/Nộp bài thành công!\nĐiểm của ${studentName}: ${score}/${total}\n${comment}`);
-        exportToExcel(score, total);
+        if (score >= 24) confetti({ particleCount: 200, spread: 100 });
+        saveAndExport(score, total);
     }
 
-    function triggerConfetti() {
-        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-    }
-
-    function exportToExcel(score, total) {
+    function saveAndExport(score, total) {
+        const endTime = new Date().toLocaleString();
+        const duration = 1800 - timeLeft;
+        const min = Math.floor(duration/60);
+        const sec = duration % 60;
+        
         const data = [
-            ["Tên Học Sinh", "Thời Gian Nộp", "Số Câu Đúng", "Tổng Số Câu", "Phần Trăm"],
-            [studentName, new Date().toLocaleString(), score, total, (score/total*100).toFixed(2) + "%"]
+            ["Tên Học Sinh", "Thời Gian Bắt Đầu", "Thời Gian Nộp", "Thời Gian Làm", "Câu Đúng", "Tổng Câu"],
+            [studentName, startTime, endTime, `${min}m ${sec}s`, score, total]
         ];
+
         const ws = XLSX.utils.aoa_to_sheet(data);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Kết quả");
+        XLSX.utils.book_append_sheet(wb, ws, "KetQua");
         XLSX.writeFile(wb, `KetQua_${studentName}.xlsx`);
     }
 </script>
+
 </body>
 </html>
